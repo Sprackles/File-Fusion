@@ -9,7 +9,7 @@ class FileFusionApp:
         self.root = root
         self.root.title("FileFusion")
         self.root.geometry("500x400")
-        self.root.resizable(False, False)
+        self.root.resizable(False, False)  # Lock the resizing of the window
         self.file_list = []
 
         self.setup_style()
@@ -49,7 +49,7 @@ class FileFusionApp:
                   background=[("active", "#005bb5")],
                   foreground=[("active", "#ffffff")])
 
-        # Style
+        # Style for text widget (not native ttk, so custom styling)
         self.root.option_add("*Text.Background", "#1e1e1e")
         self.root.option_add("*Text.Foreground", "#d4d4d4")
         self.root.option_add("*Text.Font", "Helvetica 10")
@@ -59,13 +59,14 @@ class FileFusionApp:
         initial_dir = os.path.dirname(os.path.abspath(__file__))
         files = filedialog.askopenfilenames(title="Select files", initialdir=initial_dir)
         if files:
-            self.file_list = files
+            self.file_list.extend(files)
             self.update_file_display()
 
     def update_file_display(self):
         self.file_display.delete(1.0, tk.END)
         for file_path in self.file_list:
-            self.file_display.insert(tk.END, f"{file_path}\n")
+            relative_path = os.path.relpath(file_path)
+            self.file_display.insert(tk.END, f"{relative_path}\n")
 
     def combine_files(self):
         output_file = 'all_text_combined.txt'
@@ -74,7 +75,8 @@ class FileFusionApp:
             with open(output_file, 'w') as outfile:
                 for file_path in self.file_list:
                     if os.path.exists(file_path):
-                        outfile.write(f"===== {file_path} =====\n")
+                        relative_path = os.path.relpath(file_path)
+                        outfile.write(f"===== {relative_path} =====\n")
                         with open(file_path, 'r') as infile:
                             outfile.write(infile.read())
                         outfile.write("\n\n")
